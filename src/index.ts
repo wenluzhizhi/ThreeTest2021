@@ -1,6 +1,10 @@
 import * as THREE from 'three';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import  CustomGeo from './CustomGeo'
+
+console.log(CustomGeo);
+
+
 
 class ShowRoom {
   public container: HTMLElement | undefined | null;
@@ -25,12 +29,49 @@ class ShowRoom {
     this.canvas = this.renderer.domElement;
     this.container?.appendChild(this.canvas);
     this.camera.position.set(0, 0, 30)
+    // this.testScene(); 
+    this.initControl();
+    this.initHelper()
+    this.testGeo();
+    this.run();
+  }
+
+  private testGeo() {
+    const contourSize = 10;
+    const halfContour = 5
+    const points = [
+      new THREE.Vector3(-contourSize, -contourSize, 0),
+      new THREE.Vector3(contourSize, -contourSize, 0),
+      new THREE.Vector3(contourSize, contourSize, 0),
+      new THREE.Vector3(-contourSize, contourSize, 0),
+    ];
+
+    const holes = [
+      new THREE.Vector3(-halfContour, -halfContour, 0),
+      new THREE.Vector3(halfContour, -halfContour, 0),
+      new THREE.Vector3(halfContour, halfContour, 0),
+      new THREE.Vector3(-halfContour, halfContour, 0),
+    ];
+
+    const mat = new THREE.Matrix4();
+    mat.compose(new THREE.Vector3(5, 0, 0), new THREE.Quaternion(0, 0, 0, 1), new THREE.Vector3(1,1,1))
+    holes.forEach((item)=>{
+      item.applyMatrix4(mat)
+    })
+
+
+    points.push(...holes);
+
+    const mesh = CustomGeo.GenPlaneShape(points);
+    this.scence.add(mesh);
+  }
+
+
+
+  private testScene() {
     const box = new THREE.BoxGeometry(5, 5, 5);
     const boxMesh = new THREE.Mesh(box, new THREE.MeshBasicMaterial({ color: 0xff0000 }))
     this.scence.add(boxMesh);
-    this.initControl();
-    this.initHelper()
-    this.run();
   }
 
   private initHelper() {
@@ -43,49 +84,7 @@ class ShowRoom {
   }
 
 
-  // private async LoadFurnitureSVG(length: number, width: number) {
-  //   let name;
-  //   name = "https://img.inbase.in-deco.com/crm_saas/release/20210923/b229d3b5534c42689521878e063ae71a/三人沙发.svg";
-
-  //   const loader = new SVGLoader();
-  //   const sc = 50;
-  //   const paths = await loader.loadAsync(name);
-
-  //   var group = new THREE.Group();
-  //   const viewBox = paths.xml.attributes.viewBox;
-  //   const data = viewBox.value.split(" ");
-  //   var lScale = length * sc / data[2];
-  //   var wScale = width * sc / data[3];
-
-
-
-  //   for (var i = 0; i < paths.paths.length; i++) {
-  //     var path = paths.paths[i];
-  //     var shapes = path.toShapes(true);
-
-  //     for (var j = 0; j < shapes.length; j++) {
-  //       var shape = shapes[j];
-  //       shape.autoClose = false;
-  //       let geo = new THREE.Geometry();
-  //       var points = geo.setFromPoints(shape.getPoints());
-  //       points.vertices.forEach(element => {
-  //         element.set(element.x / sc, element.y / sc, element.z / sc);
-  //       });
-  //       var mesh = new THREE.Line(points, new THREE.MeshBasicMaterial({color:0xff0000}))
-  //       group.add(mesh);
-  //     }
-  //   }
-
-  //   group.rotateX(Math.PI / 2);
-  //   let box = new THREE.Box3();
-  //   group.scale.set(lScale, wScale, 1);
-  //   box.expandByObject(group);
-  //   let center = new THREE.Vector3(0, 0, 0);
-  //   box.getCenter(center);
-  //   group.position.set(-center.x, 0, -center.z)
-  //   this.scence.add(group);
-  // }
-
+  
 
   run() {
     this.renderer.render(this.scence, this.camera);
@@ -95,5 +94,18 @@ class ShowRoom {
     })
   }
 }
+
+new ShowRoom();
+
+
+
+// import  CustomGeo from './CustomGeo'
+// class ShowRoom {
+//   constructor() {
+//     console.log('init ...')
+//     new CustomGeo();
+//   }
+
+// }
 
 new ShowRoom();

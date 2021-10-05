@@ -9,6 +9,7 @@ module.exports = {
     },
     mode: "development",
     module :{
+      unknownContextCritical : false,
     rules:[
         {
           test:/\.tsx?$/,
@@ -21,6 +22,9 @@ module.exports = {
         contentBase: resolve(__dirname, 'dist'),
         compress: true,
         port:3000,              
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
     }
 
 }
