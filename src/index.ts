@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import  CustomGeo from './CustomGeo'
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import CustomGeo from './CustomGeo'
 
 console.log(CustomGeo);
 
@@ -23,7 +23,7 @@ class ShowRoom {
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 1.0, 100);
     this.scence = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
-      antialias:true,
+      antialias: true,
     });
     this.renderer.setSize(this.width, this.height);
     this.canvas = this.renderer.domElement;
@@ -46,6 +46,17 @@ class ShowRoom {
       new THREE.Vector3(-contourSize, contourSize, 0),
     ];
 
+    const mat1 = new THREE.Matrix4();
+    const rot1 = new THREE.Quaternion();
+    rot1.setFromEuler(new THREE.Euler(0, THREE.MathUtils.DEG2RAD * 45, 0));
+    mat1.compose(new THREE.Vector3(0, 0, 0), rot1 , new THREE.Vector3(1, 1, 1))
+
+    points.forEach((item) => {
+      item.applyMatrix4(mat1)
+    })
+
+
+
     const holes = [
       new THREE.Vector3(-halfContour, -halfContour, 0),
       new THREE.Vector3(halfContour, -halfContour, 0),
@@ -54,16 +65,40 @@ class ShowRoom {
     ];
 
     const mat = new THREE.Matrix4();
-    mat.compose(new THREE.Vector3(5, 0, 0), new THREE.Quaternion(0, 0, 0, 1), new THREE.Vector3(1,1,1))
-    holes.forEach((item)=>{
+    const rot = new THREE.Quaternion();
+    rot.setFromEuler(new THREE.Euler(0, THREE.MathUtils.DEG2RAD * 45, 0));
+    mat.compose(new THREE.Vector3(0, 0, 13), rot , new THREE.Vector3(1, 1, 1))
+    holes.forEach((item) => {
       item.applyMatrix4(mat)
     })
 
 
-    points.push(...holes);
+    
 
-    const mesh = CustomGeo.GenPlaneShape(points);
+    
+    const holeMesh = CustomGeo.GenPlaneShape(holes, [], new THREE.Color(0x00ff000));
+    this.scence.add(holeMesh);
+
+    const circlePoints = CustomGeo.getFiting(points, holes);
+
+    circlePoints.forEach((item)=>{
+      this.addNewPoint(item)
+    })
+
+   const mesh = CustomGeo.GenPlaneShape(points,[] , new THREE.Color(0xff0000));
     this.scence.add(mesh);
+   
+
+
+
+  }
+
+  private addNewPoint(pos:THREE.Vector3){
+    var geometry = new THREE.SphereBufferGeometry(0.5, 32, 32);
+    var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    var sphere = new THREE.Mesh(geometry, material);
+    sphere.position.copy(pos);
+    this.scence.add(sphere);
   }
 
 
@@ -79,12 +114,12 @@ class ShowRoom {
     this.scence.add(axesHelper);
   }
   private initControl() {
-      this.control = new OrbitControls(this.camera, this.canvas);
-      this.control.enableDamping = true;
+    this.control = new OrbitControls(this.camera, this.canvas);
+    this.control.enableDamping = true;
   }
 
 
-  
+
 
   run() {
     this.renderer.render(this.scence, this.camera);
