@@ -1,11 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import CustomGeo from './CustomGeo'
-
-console.log(CustomGeo);
-
-
-
+import PlaneGeoWithHole from './PlaneGeoWithHole'
 class ShowRoom {
   public container: HTMLElement | undefined | null;
   public camera: THREE.Camera;
@@ -48,8 +43,8 @@ class ShowRoom {
 
     const mat1 = new THREE.Matrix4();
     const rot1 = new THREE.Quaternion();
-    rot1.setFromEuler(new THREE.Euler(0, THREE.MathUtils.DEG2RAD * 45, 0));
-    mat1.compose(new THREE.Vector3(0, 0, 0), rot1 , new THREE.Vector3(1, 1, 1))
+    rot1.setFromEuler(new THREE.Euler(0, THREE.MathUtils.DEG2RAD * 0, 0));
+    mat1.compose(new THREE.Vector3(0, 0, 0), rot1, new THREE.Vector3(1, 1, 1))
 
     points.forEach((item) => {
       item.applyMatrix4(mat1)
@@ -67,33 +62,33 @@ class ShowRoom {
     const mat = new THREE.Matrix4();
     const rot = new THREE.Quaternion();
     rot.setFromEuler(new THREE.Euler(0, THREE.MathUtils.DEG2RAD * 45, 0));
-    mat.compose(new THREE.Vector3(0, 0, 13), rot , new THREE.Vector3(1, 1, 1))
+    mat.compose(new THREE.Vector3(0, 0, 13), rot, new THREE.Vector3(1, 1, 1))
     holes.forEach((item) => {
       item.applyMatrix4(mat)
     })
 
 
-    
-
-    
-    const holeMesh = CustomGeo.GenPlaneShape(holes, [], new THREE.Color(0x00ff000));
-    this.scence.add(holeMesh);
-
-    const circlePoints = CustomGeo.getFiting(points, holes);
-
-    circlePoints.forEach((item)=>{
-      this.addNewPoint(item)
-    })
-
-   const mesh = CustomGeo.GenPlaneShape(points,[] , new THREE.Color(0xff0000));
-    this.scence.add(mesh);
-   
 
 
+
+
+
+    // const circlePoints = PlaneGeoWithHole.getFiting(points, holes);
+
+    // circlePoints.forEach((item) => {
+    //   this.addNewPoint(item)
+    // })
+
+    const geo = PlaneGeoWithHole.getPlaneGeoHole(holes, []);
+    this.scence.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color:0xff0000})));
+
+    const holeGeo = PlaneGeoWithHole.getPlaneGeoAwayHole(points, holes);
+    this.scence.add(new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({color:0x00ff00})));
+    //PlaneGeoWithHole.getD2Matrix(points,this.scence);
 
   }
 
-  private addNewPoint(pos:THREE.Vector3){
+  private addNewPoint(pos: THREE.Vector3) {
     var geometry = new THREE.SphereBufferGeometry(0.5, 32, 32);
     var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
     var sphere = new THREE.Mesh(geometry, material);
@@ -132,15 +127,3 @@ class ShowRoom {
 
 new ShowRoom();
 
-
-
-// import  CustomGeo from './CustomGeo'
-// class ShowRoom {
-//   constructor() {
-//     console.log('init ...')
-//     new CustomGeo();
-//   }
-
-// }
-
-new ShowRoom();
